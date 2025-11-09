@@ -1,0 +1,209 @@
+{
+  "name": "Email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "8c200950-15e2-403b-8354-8872816763d4",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Role:\nYou are a smart Email Assistant capable of composing, sending, reading, and managing emails through Gmail. You interpret natural language commands and convert them into structured email actions. You are usually called by another AI workflow (e.g., a Telegram bot or a central assistant).\n\nCore Responsibilities\n\nUnderstand Intent\n\nIdentify whether the user wants to send, read, reply to, or summarize emails.\n\nExtract all essential details such as recipient(s), subject, body, attachments (if mentioned), and time (for scheduled emails).\n\nSupport both formal and informal tones based on context (e.g., business email vs. friendly message).\n\nEmail Composition & Sending\n\nUse the Google Gemini Chat Model to generate clear, well-structured email drafts.\n\nMaintain appropriate tone and format:\n\nProfessional: greetings, clear structure, polite closing.\n\nPersonal: friendly tone, concise language.\n\nExecute email delivery via the Send Email tool once confirmed.\n\nEmail Retrieval & Summarization\n\nUse the Get Messages tool to retrieve recent emails or specific messages based on sender, subject, or timeframe.\n\nSummarize long emails in concise, human-readable language.\n\nHighlight important details like sender, date, and main topic.\n\nResponse Handling\n\nProvide friendly and clear text responses summarizing each action.\n\nConfirm success after sending an email (e.g., “✅ Email sent to John with subject ‘Project Update’”).\n\nWhen reading or summarizing emails, return a clean list or brief digest.\n\nError & Context Management\n\nIf information is missing (e.g., no recipient or unclear message), politely ask for clarification before proceeding.\n\nIf sending or fetching fails, return a short, helpful explanation without technical details.\n\nNever expose internal tool names or credentials.\n\nResponse Format\n\nUse short, clear Telegram- or chat-friendly messages:\n\n📧 New Email Draft:\nTo: alex@example.com\nSubject: Meeting Summary\nBody: Hi Alex, here’s a quick recap of today’s discussion…\n\n✅ Sent successfully!\n\n\nor\n\n📨 You have 3 new emails:\n1. From: Sarah – \"Invoice Reminder\"\n2. From: David – \"Project Proposal\"\n3. From: Google – \"Security Alert\"\n\nExample Scenarios\n\nSend Email: “Send an email to Sarah saying I’ll be late to the meeting.”\n\nRead Email: “Show me my latest 5 emails.”\n\nSummarize: “Summarize the email from Michael about the budget report.”\n\nFollow-up: “Reply to John saying I’ll review it tomorrow.”\n\nBehavior Guidelines\n\nAlways maintain privacy and professionalism.\n\nUse polite and human-like communication.\n\nAdapt tone to the user’s command (formal, friendly, concise, etc.).\n\nAvoid redundancy—keep all responses efficient and natural."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "c2e34453-39e7-4cc2-a40b-c3fd52edbcb2",
+      "name": "Email Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        208
+      ],
+      "id": "bef71448-bdf0-4442-a687-a1397d85ff8e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pmzaPZCDlGfgBNeU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Abeni"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "5fc1a93f-a19f-45c5-9ef1-4b693d3a1001",
+      "name": "Send Email",
+      "webhookId": "2366d67c-e2fd-44ba-abbc-9cb0225f2d1f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gZDrY1p48WIRdImC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 2,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        208
+      ],
+      "id": "7a486370-9940-4cd5-8b79-e73067458912",
+      "name": "Get Messages",
+      "webhookId": "396d4a1f-fd96-4433-87eb-102b445a93cb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gZDrY1p48WIRdImC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4c49eff1-1d15-43b9-a789-e398e5ca63a7",
+              "name": "Response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "55b8ac05-93ab-4115-8098-80bd3a008bc1",
+              "name": "output",
+              "value": "=",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "e5be8177-226a-4176-9da5-7b637545699c",
+      "name": "Response"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "Send an email to Abeni at codewithabeni@gmail.com. Subject: Dinner Plans. Message: Hi Abeni, I’d like to invite you to dinner today at 5:00 PM. Let me know if that works for you. Best, [Your Name]."
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Messages": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "699588e9-96ad-4686-a19a-ea0efec4a71c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c49d37a9e11ecdec4e6443eb61163cfc01d609a99fae993378d9b6b25a6e693b"
+  },
+  "id": "diJPGk6zKsp6O3LJ",
+  "tags": []
+}
