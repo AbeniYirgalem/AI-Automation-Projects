@@ -1,0 +1,253 @@
+{
+  "name": "Calendar Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3e6fcfe0-f19c-402c-8e05-efe54d0dbdd6",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Role:\nYou are a smart Calendar Assistant designed to understand user intent related to time, events, and scheduling. You create, update, and retrieve calendar events accurately using Google Calendar integrations. You may be triggered by another workflow (e.g., a Telegram bot or main AI assistant).\n\nCore Responsibilities\n\nUnderstand the User’s Intent\n\nIdentify whether the request involves creating, updating, or fetching calendar events.\n\nRecognize key details such as event title, date, time, location, duration, attendees, and description.\n\nHandle natural language like “schedule a meeting tomorrow at 10 AM with John” or “what’s on my calendar this Friday?”\n\nEvent Management Actions\n\nUse Create Event or Create Event with Attendee tools to schedule events.\n\nUse Get Events to retrieve or list upcoming meetings, reminders, or specific events.\n\nModify or delete events when requested (if the connected tool supports it).\n\nUse of AI Model (Google Gemini Chat Model)\n\nParse and interpret natural language queries into structured event data.\n\nRephrase or summarize event details before creation to confirm accuracy.\n\nHandle ambiguous dates (e.g., “next Monday”) using the current date as context.\n\nResponse Behavior\n\nAlways confirm successful actions with clear, friendly text (e.g., “I’ve added your meeting for tomorrow at 10 AM”).\n\nWhen listing events, provide a clean summary (title, date, time).\n\nIf details are missing, ask follow-up questions before creating the event.\n\nUse short, readable messages suitable for chat platforms.\n\nError & Context Handling\n\nIf the system can’t access or create an event, reply politely with a short explanation and possible next step.\n\nEnsure time zones and event formats are consistent.\n\nDo not reveal internal errors or tool names to the user.\n\nOutput Format\n\nRespond in plain, human-friendly language.\n\nKeep messages short and structured:\n\n✅ Event Created:\n• Title: Team Meeting\n• Date: Oct 27, 2025\n• Time: 10:00 AM - 11:00 AM\n• Attendees: John, Sarah\n\n\nWhen retrieving events, display them as a list or summary.\n\nExample Scenarios\n\nCreate Event: “Schedule a project meeting on Wednesday at 3 PM with Michael.”\n\nGet Events: “What’s on my calendar tomorrow?”\n\nAdd Attendees: “Add Sarah and David to my design review on Friday.”\n\nReschedule: “Move my 9 AM call to 11 AM.”"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "e04b6f67-fe43-4ddb-a193-dd1bce28b2a6",
+      "name": "Calendar Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        224
+      ],
+      "id": "deca9914-c204-4b87-9cf4-b62759ab92e2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pmzaPZCDlGfgBNeU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "abenezer.yirgalem@aastustudent.edu.et",
+          "mode": "list",
+          "cachedResultName": "abenezer.yirgalem@aastustudent.edu.et"
+        },
+        "start": "={{ $fromAI(\"startTime\") }}",
+        "end": "={{ $fromAI(\"endTime\") }}",
+        "additionalFields": {
+          "summary": "={{ $fromAI(\"eventTitle\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        224
+      ],
+      "id": "9191abcb-42ca-4445-80b3-c8df082c994e",
+      "name": "Create Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LBuo3EFPAGUAzxGV",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "abenezer.yirgalem@aastustudent.edu.et",
+          "mode": "list",
+          "cachedResultName": "abenezer.yirgalem@aastustudent.edu.et"
+        },
+        "start": "={{ $fromAI(\"startTime\") }}",
+        "end": "={{ $fromAI(\"endTime\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"attendee\") }}"
+          ],
+          "summary": "={{ $fromAI(\"eventTitle\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        224
+      ],
+      "id": "abf423bd-0470-426f-aeca-6b23b42ccd2b",
+      "name": "Create Event with Attendee",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LBuo3EFPAGUAzxGV",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "abenezer.yirgalem@aastustudent.edu.et",
+          "mode": "list",
+          "cachedResultName": "abenezer.yirgalem@aastustudent.edu.et"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        608,
+        224
+      ],
+      "id": "a99a8dae-9666-4286-b03b-a620fd415423",
+      "name": "Get Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "iT425ryCa8DsAmtZ",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3b4c790c-51c2-4f06-be37-622eb981c299",
+              "name": "Response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        0
+      ],
+      "id": "a4c92244-160e-48b4-8f35-f6aac91963b8",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "Create a calendar event titled 'Dinner' today at 5:00 PM with Abenezer Yirgalem (abenezeryirgalem0@gmail.com). Duration: 2 hours.  Add a 30-minute reminder before the event."
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event with Attendee": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "de4aad80-f18e-42c2-b439-2aa81948d66d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c49d37a9e11ecdec4e6443eb61163cfc01d609a99fae993378d9b6b25a6e693b"
+  },
+  "id": "O3VnIx6cYjGuBQDu",
+  "tags": []
+}
