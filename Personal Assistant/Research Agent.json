@@ -1,0 +1,218 @@
+{
+  "name": "Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "Research Task:\n\nYou have access to Wikipedia, Hacker News API, and Serp API. Please do the following:\n\nSearch Wikipedia for background and factual information on the topic.\n\nUse the Hacker News API to find recent discussions, news, or opinions related to the topic.\n\nUse the Serp API to retrieve relevant search results from the broader web.\n\nInstructions:\n\nExtract key findings from each source and summarize them clearly.\n\nHighlight any patterns, trends, or notable differences between sources.\n\nList specific references, links, or citation details for each insight.\n\nNote conflicting or missing information and assess data reliability.\n\nPresent output as an executive summary, followed by organized findings per source, and end with actionable recommendations if applicable.\n\nIf any source returns limited or no results, report this and suggest alternative search methods."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        -16
+      ],
+      "id": "5caf4324-3b68-4de0-bd90-d51d7e583e4c",
+      "name": "Research Agent"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "c6e50c16-bc6e-430a-91fb-317273d7b9db",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        176,
+        208
+      ],
+      "id": "94e7446a-0ed1-4d8c-bb63-ff12e2f495b8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pmzaPZCDlGfgBNeU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        304,
+        208
+      ],
+      "id": "a09d5936-0765-4b12-8c74-db772ad60401",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        432,
+        208
+      ],
+      "id": "dffbe590-1b0c-4ee3-8aee-e32e979124b0",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "tq0MK4SYkWvkr6mH",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "all",
+        "additionalFields": {
+          "keyword": "={{ $fromAI(\"keyword\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.hackerNewsTool",
+      "typeVersion": 1,
+      "position": [
+        560,
+        208
+      ],
+      "id": "7a565deb-a380-4d01-8e66-b4fd07dad88a",
+      "name": "Get many items in Hacker News"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "791d8de8-6100-4f0a-ab0b-9a7fbe03c16b",
+              "name": "Response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "97f302dd-f29b-4a7b-be1c-cd3739b01129",
+      "name": "Response"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many items in Hacker News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "03e4d2b2-e211-4538-ac1f-7b9315d2cfa1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c49d37a9e11ecdec4e6443eb61163cfc01d609a99fae993378d9b6b25a6e693b"
+  },
+  "id": "yr9FW2a1GVk8xSgx",
+  "tags": []
+}
