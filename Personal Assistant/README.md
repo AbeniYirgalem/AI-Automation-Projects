@@ -32,10 +32,5 @@
 
 - The files live at the repository root alongside this `README.md`.
 
-**License**
 
-- No license file included. Add a `LICENSE` if you want to set reuse terms.
 
----
-
-If you'd like a richer README (examples, sample runtime, or a `requirements` file), tell me which runtime or platform you plan to use and I'll add runnable examples.
